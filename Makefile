@@ -3,10 +3,10 @@
 .IGNORE: clean
 
 CC = g++
-LDLIBS = -lcups
+LDLIBS = -lcups -lncurses
 
-build:
-	mkdir bin
+build: clean
+	- mkdir bin
 	$(CC) src/main.cpp -o bin/print-function $(LDLIBS)
 
 clean:
