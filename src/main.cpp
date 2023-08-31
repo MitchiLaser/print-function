@@ -1,13 +1,14 @@
-#include <cstdlib>
+#include <cstring>
 #include <cups/cups.h>
 #include <curses.h>
-#include <ncurses.h>
+#include <iostream>
 #include <stdexcept>
 #include <string>
-#include <iostream>
 
 #define COLOUR_PAIR_BACKGROUND 1
 #define COLOUR_PAIR_APPLICATION 2
+
+std::string printfile;
 
 // all the data retrieved from cups will be stored in this structure
 struct printers_data {
@@ -76,9 +77,9 @@ int print_search_cb(void *user_data, unsigned flags, cups_dest_t *dest) {
     // this is the deprecated old version to realise the function call without
     // annoying warnings from the linter
     /*
-     *(*(printers_data*)(&user_data)).num_dests = cupsCopyDest(
-     *  dest, (*(printers_data*)(&user_data)).num_dests,
-     *&(*(printers_data*)(&user_data)).dests
+     *(*(printers_data*)user_data).num_dests = cupsCopyDest(
+     *  dest, (*(printers_data*)user_data).num_dests,
+     *&(*(printers_data*)user_data).dests
      *);
      */
   }
@@ -101,7 +102,28 @@ void reverse(void) {
   endwin();
 }
 
+std::string get_help_text(void) {
+  return std::string(
+      "Print-Function: Print dialog for documents on the console\n"
+      "\n"
+      "usage: print \e[3mfile\e[0m\n"
+      "\n"
+      "options:\n"
+      "\tfile\t The file which has to be printed\n");
+      //TODO: implelent support for logging application activity into specified logfile. (disable comments)
+      //"usage: print [-l \e[3mlog-file\e[0m] \e[3mfile\e[0m\n"
+      //"\t-l\t log the applications internal operations in a logfile. "
+      //"This was designed only for debugging purposes.\n");
+}
+
 int main(int argc, char **argv) {
+  // check command line arguments
+  if (argc == 2) { // no logging, only a file to print was specified
+    printfile = std::string(argv[1]);
+  } else { // there is something wrong. Print help text and exit
+    std::cerr << get_help_text();
+    exit(EXIT_SUCCESS);
+  }
 
   try {
     // get the builtin printers from the OS via the CUPS interface
