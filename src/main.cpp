@@ -107,6 +107,12 @@ void reverse(void) {
   endwin();
 }
 
+void log(std::string add_to_file) {
+  if (logging) {
+    logfile << add_to_file << std::endl;
+  }
+}
+
 std::string get_help_text(void) {
   return std::string(
       "Print-Function: Print dialog for documents on the console\n"
@@ -124,24 +130,26 @@ int main(int argc, char **argv) {
   if (argc == 2) { // no logging, only a file to print was specified
     printfile = std::string(argv[1]);
   } else if (argc == 4) { // output file and logfile
-    if (std::strcmp(argv[1],
-                    "-l")) { // logfile is argv[2], print file is argv[3]
+    if (std::strcmp(argv[1], "-l") == 0) {
+      // logfile is argv[2], print file is argv[3]
       printfile = std::string(argv[3]);
       logfile.open(argv[2], std::ios::out | std::ios::trunc);
-    } else if (std::strcmp(argv[2],
-                           "-l")) { // logfile is argv[3], print file is argv[1]
+    } else if (std::strcmp(argv[2], "-l") == 0) {
+      // logfile is argv[3], print file is argv[1]
       printfile = std::string(argv[1]);
       logfile.open(argv[3], std::ios::out | std::ios::trunc);
 
     } else {
-      std::cerr << "Wrong command line parameters" << std::endl;
+      std::cerr << "Wrong command line parameter usage" << std::endl;
       exit(EXIT_FAILURE);
     }
     logging = true;
+    log("Beginning log");
   } else { // there is something wrong. Print help text and exit
     std::cerr << get_help_text();
     exit(EXIT_SUCCESS);
   }
+  log("file which was selected for printing: " + std::string(printfile));
   // now the logfile and the print-file have been specified (please replace this
   // crappy argument parsing in the future)
 
@@ -182,8 +190,16 @@ int main(int argc, char **argv) {
     // stop the curses session
     reverse();
     // TODO: Add proper exception printing
+    if (logging) {
+      log("ERROR: There was an exception");
+      logfile.close();
+    }
     exit(EXIT_FAILURE);
   }
   reverse();
+  if (logging) {
+    log("Closing program");
+    logfile.close();
+  }
   exit(EXIT_SUCCESS);
 }

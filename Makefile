@@ -7,7 +7,7 @@ LDLIBS = -lcups -lncurses
 
 build: clean
 	- mkdir bin
-	$(CC) src/main.cpp -o bin/print-function $(LDLIBS)
+	$(CC) src/main.cpp -o bin/print $(LDLIBS)
 
 clean:
 	rm -rf bin
