@@ -1,6 +1,8 @@
+#include <cstdlib>
 #include <cstring>
 #include <cups/cups.h>
 #include <curses.h>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -8,6 +10,9 @@
 #define COLOUR_PAIR_BACKGROUND 1
 #define COLOUR_PAIR_APPLICATION 2
 
+// global variables
+bool logging = false;
+std::ofstream logfile;
 std::string printfile;
 
 // all the data retrieved from cups will be stored in this structure
@@ -106,24 +111,39 @@ std::string get_help_text(void) {
   return std::string(
       "Print-Function: Print dialog for documents on the console\n"
       "\n"
-      "usage: print \e[3mfile\e[0m\n"
+      "usage: print [-l \e[3mlog-file\e[0m] \e[3mfile\e[0m\n"
       "\n"
       "options:\n"
-      "\tfile\t The file which has to be printed\n");
-      //TODO: implelent support for logging application activity into specified logfile. (disable comments)
-      //"usage: print [-l \e[3mlog-file\e[0m] \e[3mfile\e[0m\n"
-      //"\t-l\t log the applications internal operations in a logfile. "
-      //"This was designed only for debugging purposes.\n");
+      "\tfile\t The file which has to be printed\n"
+      "\t-l\t log the applications internal operations in a logfile. "
+      "This was designed only for debugging purposes.\n");
 }
 
 int main(int argc, char **argv) {
   // check command line arguments
   if (argc == 2) { // no logging, only a file to print was specified
     printfile = std::string(argv[1]);
+  } else if (argc == 4) { // output file and logfile
+    if (std::strcmp(argv[1],
+                    "-l")) { // logfile is argv[2], print file is argv[3]
+      printfile = std::string(argv[3]);
+      logfile.open(argv[2], std::ios::out | std::ios::trunc);
+    } else if (std::strcmp(argv[2],
+                           "-l")) { // logfile is argv[3], print file is argv[1]
+      printfile = std::string(argv[1]);
+      logfile.open(argv[3], std::ios::out | std::ios::trunc);
+
+    } else {
+      std::cerr << "Wrong command line parameters" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+    logging = true;
   } else { // there is something wrong. Print help text and exit
     std::cerr << get_help_text();
     exit(EXIT_SUCCESS);
   }
+  // now the logfile and the print-file have been specified (please replace this
+  // crappy argument parsing in the future)
 
   try {
     // get the builtin printers from the OS via the CUPS interface
