@@ -38,3 +38,6 @@ bin/
 
 ## vim-gutentags
 tags
+
+## logfile which might be created during a test run
+logfile

@@ -65,10 +65,13 @@ void curse(void) {
     init_pair(COLOUR_PAIR_BACKGROUND, COLOR_WHITE, COLOR_MAGENTA);
     init_pair(COLOUR_PAIR_APPLICATION, COLOR_WHITE, COLOR_BLUE);
   }
-  // TODO: Continue
 
   // clear screen
   clear();
+}
+
+void init_form(void){
+  //TODO: write code
 }
 
 int print_search_cb(void *user_data, unsigned flags, cups_dest_t *dest) {
@@ -165,17 +168,17 @@ int main(int argc, char **argv) {
         print_search_cb, // callback which will be called on each destination
         &printers        // the storage location for all the retrieved data
     );
-    // TODO: check wether this works (on a system with available printers)
+
     std::string printer_names[printers.num_dests];
     for (int i = 0; i < printers.num_dests; i++) {
       printer_names[i] = printers.dests[i].name;
-      // the following statement is just for debugging there
-      std::cout << "Found printer:" << printer_names[i] << std::endl;
+      log("Found printer: " + std::string(printer_names[i]));
     }
 
     // initialise curses object
     curse();
 
+    init_form();
     // TODO: Add further changes to the screen
 
     // update screen
