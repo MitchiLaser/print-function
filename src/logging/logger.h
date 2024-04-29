@@ -8,6 +8,7 @@
 
 #pragma once
 #include <fstream>
+#include <string>
 
 // every logging level contains the levels below it
 #define LOG_DEBUG 1
@@ -24,10 +25,12 @@
 template <typename T> class logger {
 private:
     std::ofstream logfile;
-    void write(const T& message);
+    void write(const std::string level, const T& message);
+    std::string name;
 public:
-    logger(const std::string& filename) {
+    logger(const std::string& filename, std::string component_name = "") {
         logfile.open(filename, std::ios::app); // append to file
+        name = component_name;
     }
     ~logger() {
         if (logfile.is_open()) {
@@ -37,30 +40,30 @@ public:
 
     void debug(const T& message) {
 #if LOG_LEVEL <= LOG_DEBUG
-        write("[DEBUG] " + message);
+        write("[DEBUG] ", message);
 #endif
     }
 
     void info(const T& message) {
 #if LOG_LEVEL <= LOG_INFO
-        write("[INFO] " + message);
+        write("[INFO] ", message);
 #endif
     }
 
     void warning(const T& message) {
 #if LOG_LEVEL <= LOG_WARNING
-        write("[WARNING] " + message);
+        write("[WARNING] ", message);
 #endif
     }
 
     void error(const T& message) {
 #if LOG_LEVEL <= LOG_ERROR
-        write("[ERROR] " + message);
+        write("[ERROR] ", message);
 #endif
     }
 };
 
 template <typename T>
-void logger<T>::write(const T& message) {
-    logfile << message << std::endl;
+void logger<T>::write(const std::string level, const T& message) {
+    logfile << level <<  name << ": " << message << std::endl;
 }
